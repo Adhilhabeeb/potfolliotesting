@@ -430,7 +430,53 @@ let unifopm={
      if (heightValue > 0.6) {
       
         console.log("green",heightValue)
-BLADE_HEIGHT=0.4
+
+
+BLADE_HEIGHT=0.8
+
+             const xpl = vertices.getX(i);
+
+        const ypl = vertices.getY(i);
+        const zpl = vertices.getZ(i);
+        const randomX = xpl + (Math.random() - 0.5) * 0.1;
+        const randomY = ypl + (Math.random() - 0.5) * 0.1;
+        const randomZ = zpl + (Math.random() - 0.5) * 0.1;
+  // 
+        // const particle = new THREE.Points(new THREE.SphereGeometry(0.06), new THREE.PointsMaterial());
+
+        //             particle.position.set(randomX, randomY, randomZ);
+
+        const VERTEX_COUNT = 5;
+        const surfaceMin = PLANE_SIZE / 2;
+        const surfaceMax = (PLANE_SIZE / 2) * -1;
+        const radius = pano.attributes.position.count;
+        const r = radius * Math.sqrt(Math.random());
+        const theta = Math.random() * 2 * Math.PI;
+        const x = r * Math.cos(theta);
+        const y = r * Math.sin(theta);
+
+        const pos = new THREE.Vector3(randomX, 0, randomY);
+// console.log(pos)
+        const uv = [
+          convertRange(pos.x, surfaceMin, surfaceMax, 0, 1),
+          convertRange(pos.z, surfaceMin, surfaceMax, 0, 1)
+        ];
+
+        const blade = generateBlade(pos, i * VERTEX_COUNT, uv);
+        blade.verts.forEach((vert) => {
+          positions.push(...vert.pos);
+          uvs.push(...vert.uv);
+          colors.push(...vert.color);
+        });
+        blade.indices.forEach((indice) => indices.push(indice));
+
+
+    // vertices.setY(i, heightValue * 100);
+
+
+
+        } else {
+BLADE_HEIGHT=0.1
 
    const xpl = vertices.getX(i);
 
@@ -524,52 +570,6 @@ BLADE_HEIGHT=0.4
 
 
 
-
-
-
-
-    // vertices.setY(i, heightValue * 100);
-
-
-
-        } else {
-BLADE_HEIGHT=0.8
-
-             const xpl = vertices.getX(i);
-
-        const ypl = vertices.getY(i);
-        const zpl = vertices.getZ(i);
-        const randomX = xpl + (Math.random() - 0.5) * 0.1;
-        const randomY = ypl + (Math.random() - 0.5) * 0.1;
-        const randomZ = zpl + (Math.random() - 0.5) * 0.1;
-  // 
-        // const particle = new THREE.Points(new THREE.SphereGeometry(0.06), new THREE.PointsMaterial());
-
-        //             particle.position.set(randomX, randomY, randomZ);
-
-        const VERTEX_COUNT = 5;
-        const surfaceMin = PLANE_SIZE / 2;
-        const surfaceMax = (PLANE_SIZE / 2) * -1;
-        const radius = pano.attributes.position.count;
-        const r = radius * Math.sqrt(Math.random());
-        const theta = Math.random() * 2 * Math.PI;
-        const x = r * Math.cos(theta);
-        const y = r * Math.sin(theta);
-
-        const pos = new THREE.Vector3(randomX, 0, randomY);
-// console.log(pos)
-        const uv = [
-          convertRange(pos.x, surfaceMin, surfaceMax, 0, 1),
-          convertRange(pos.z, surfaceMin, surfaceMax, 0, 1)
-        ];
-
-        const blade = generateBlade(pos, i * VERTEX_COUNT, uv);
-        blade.verts.forEach((vert) => {
-          positions.push(...vert.pos);
-          uvs.push(...vert.uv);
-          colors.push(...vert.color);
-        });
-        blade.indices.forEach((indice) => indices.push(indice));
         // console.log("yellow",heightValue)
         }
 
@@ -844,423 +844,3 @@ scene.clear();
 };
 
 export default DancingGrass;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    function generateField() {
-      const positionAttribute = pano.getAttribute("position");
-
-        let IMAGE_SRC="../public/cann.png"
-    var image = new Image();
-    image.src = IMAGE_SRC;
-
-        
-let canvas;
-    var texture = new THREE.Texture();
-  texture.image = image;
-//  var material = new THREE.MeshBasicMaterial({
-//     side: THREE.DoubleSide,
-//     shading: THREE.SmoothShading,
-//     map: texture
-//   });
-   const positions = [];
-      const uvs = [];
-      const indices = [];
-      const uvAttribute = pano.getAttribute("uv");
-      let vertices = pano.attributes.position;
-
- image.onload=()=>{
-  
-  alert("loaded")
-
-
-   texture.needsUpdate = true;
-
-    canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-
-
-  const ctx = canvas.getContext("2d");
-      ctx.drawImage(image, 0, 0, size, size);
-      const imgData = ctx.getImageData(0, 0, size, size).data;
-    canvas.getContext('2d').drawImage(image, 0, 0,size, size);
-
-
-      for (let i = 0; i < BLADE_COUNT; i++) {
-
-
-function callimag(){
-  const x = i % size;
-        const y = Math.floor(i / size);
-        // console.log(i,size,Math.floor(i/size),"iio",i%size)
-
-        const pixelIndex = (y * size + x) * 4;
-        const r = imgData[pixelIndex];
-        const heightValue = r / 255;
-
-        console.log(heightValue,"heightvalue")
-        vertices.setY(i, heightValue *1.);
-
-           if (heightValue > 0.6) {
-          colors.push(0.1, 0.6, 0.1); // green
-        } else {
-          colors.push(1.0, 1.0, 0.0); // yellow
-        }
-
-
-       
-}
-callimag()
-
-
-
-
-
-
-
-
-
-
-
-        const xpl = vertices.getX(i);
-
-        const ypl = vertices.getY(i);
-        const zpl = vertices.getZ(i);
-        const randomX = xpl + (Math.random() - 0.5) * 0.1;
-        const randomY = ypl + (Math.random() - 0.5) * 0.1;
-        const randomZ = zpl + (Math.random() - 0.5) * 0.1;
-
-        // const particle = new THREE.Points(new THREE.SphereGeometry(0.06), new THREE.PointsMaterial());
-
-        //             particle.position.set(randomX, randomY, randomZ);
-
-        const VERTEX_COUNT = 5;
-        const surfaceMin = PLANE_SIZE / 2;
-        const surfaceMax = (PLANE_SIZE / 2) * -1;
-        const radius = pano.attributes.position.count;
-        const r = radius * Math.sqrt(Math.random());
-        const theta = Math.random() * 2 * Math.PI;
-        const x = r * Math.cos(theta);
-        const y = r * Math.sin(theta);
-
-        const pos = new THREE.Vector3(randomX, 0, randomY);
-        
-        // console.log("lengthhhhljgihwdgbkhfgbdg",pano.worldToLocal(pos.clone()))
-// const noGrassRadius = 2;
-// if (pos.length() < noGrassRadius) {
-//   continue; // Skip this blade
-// }
-let placewidth=1
-const exclusionSize = 10;
-if (
-  Math.abs(pos.x) < placewidth &&
-  Math.abs(pos.z) < exclusionSize
-) {
-  const myPlane = new THREE.Mesh(
-  new THREE.PlaneGeometry(placewidth+placewidth, exclusionSize+exclusionSize), // slightly smaller than the gap
-  new THREE.MeshBasicMaterial({ color: 'yellow', side: THREE.DoubleSide,vertexColors:true })
-);
-myPlane.rotation.x = -Math.PI / 2;
-myPlane.position.set(0, 0.01, 0); // y = 0.01 to float above grass
-scene.add(myPlane);
-
-  continue; // Inside square in center, skip
-}
-
-        const uv = [
-          convertRange(pos.x, surfaceMin, surfaceMax, 0, 1),
-          convertRange(pos.z, surfaceMin, surfaceMax, 0, 1)
-        ];
-
-        const blade = generateBlade(pos, i * VERTEX_COUNT, uv);
-        blade.verts.forEach((vert) => {
-          positions.push(...vert.pos);
-          uvs.push(...vert.uv);
-        
-        });
-        blade.indices.forEach((indice) => indices.push(indice));
-      }
-
-
- }
-   
-
-    
-     
-
-
-      
-    
-
-      geom.setAttribute(
-        "position",
-        new THREE.BufferAttribute(new Float32Array(positions), 3)
-      );
-      geom.setAttribute(
-        "uv",
-        new THREE.BufferAttribute(new Float32Array(uvs), 2)
-      );
-      geom.setAttribute(
-        "color",
-        new THREE.BufferAttribute(new Float32Array(colors), 3)
-      );
-      geom.setIndex(indices);
-      let plka = new THREE.PlaneGeometry(2, 2);
-      // geom.computeVertexNormals();
-      // geom.computeFaceNormals();
-
-      const mesh = new THREE.Mesh(geom, grassMaterial);
-
-
-
-
-      scene.add(mesh);
-
-      // glassgrid(positions,uvs,colors)
-    
-    }
-
-function glassgrid(positions,uvs,colors) {
-  
-let add=[]
-
-
-  const positionAttribute = pano.getAttribute("position");
-
-    
-  const uvAttribute = pano.getAttribute("uv");
-  const smallPlaneSize = 0.09; // Size of each small plane
-
-let coil=geom.getAttribute("color").array
-
-
-  for (let i = 0; i < positionAttribute.count; i++) {
-// console.log(coil,"fgf")
-    const smallGeometry = new THREE.PlaneGeometry(smallPlaneSize, smallPlaneSize);
-
-
-  
-    const pos = new THREE.Vector3().fromBufferAttribute(positionAttribute, i);
-    const uv = new THREE.Vector2().fromBufferAttribute(uvAttribute, i);
-
-    smallGeometry.setAttribute(
-      "color",
-      new THREE.Float32BufferAttribute([
-        uv.x, uv.y, 
-        uv.x , uv.y, 
-        uv.x, uv.y , 
-        uv.x , uv.y 
-      ], 2)
-    );
-  
-    // // Apply correct UV mapping
-    smallGeometry.setAttribute(
-      "uv",
-      new THREE.Float32BufferAttribute([
-        uv.x, uv.y, 
-        uv.x , uv.y, 
-        uv.x, uv.y , 
-        uv.x , uv.y 
-      ], 2)
-    );
-
-
- 
-  
-    const smallMaterial = new THREE.MeshBasicMaterial({ map: grassTexture, side: THREE.DoubleSide});
-
-
-
-    // console.log(pos)
-    // Create and position small plane
-    const smallPlane = new THREE.Mesh(smallGeometry, smallMaterial);
-    smallPlane.position.copy(new THREE.Vector3(pos.x,pos.y,pos.z));
-
-adtt.push(smallPlane)
-    
-
-
-
-    
-   }
-}
-
-
-if (adtt.length>=pano.attributes.position.count-3) {
-
-
-let grp=new THREE.Group()
-aarr.current=adtt
-
-adtt.forEach(e=>{
-  
-grp.add(e)
-
-
-  }
-)
-
-scene.add(grp)
-}
-
-
-    function generateBlade(center, vArrOffset, uv) {
-      const MID_WIDTH = BLADE_WIDTH * 0.5;
-      const TIP_OFFSET = 0.1;
-      const height = BLADE_HEIGHT;
-
-      const yaw = Math.random() * Math.PI * 2;
-      const yawUnitVec = new THREE.Vector3(Math.sin(yaw), 0, -Math.cos(yaw));
-      const tipBend = Math.random() * Math.PI * 2;
-      const tipBendUnitVec = new THREE.Vector3(
-        Math.sin(tipBend),
-        0,
-        -Math.cos(tipBend)
-      );
-
-      // Find the Bottom Left, Bottom Right, Top Left, Top right, Top Center vertex positions
-      const bl = new THREE.Vector3().addVectors(
-        center,
-        new THREE.Vector3()
-          .copy(yawUnitVec)
-          .multiplyScalar((BLADE_WIDTH / 2) * 1)
-      );
-      const br = new THREE.Vector3().addVectors(
-        center,
-        new THREE.Vector3()
-          .copy(yawUnitVec)
-          .multiplyScalar((BLADE_WIDTH / 2) * -1)
-      );
-      const tl = new THREE.Vector3().addVectors(
-        center,
-        new THREE.Vector3().copy(yawUnitVec).multiplyScalar((MID_WIDTH / 2) * 1)
-      );
-      const tr = new THREE.Vector3().addVectors(
-        center,
-        new THREE.Vector3()
-          .copy(yawUnitVec)
-          .multiplyScalar((MID_WIDTH / 2) * -1)
-      );
-      const tc = new THREE.Vector3().addVectors(
-        center,
-        new THREE.Vector3().copy(tipBendUnitVec).multiplyScalar(TIP_OFFSET)
-      );
-
-      tl.y += height / 2;
-      tr.y += height / 2;
-      tc.y += height;
-
-      // Vertex Colors
-      const black = [0.0, 0.0, 0.0];
-      const gray = [0.5, 0.0, 0.0];
-      const white = [1.0, 1.0, 1.0];
-
-      const verts = [
-        { pos: bl, uv: uv, color: black },
-        { pos: br, uv: uv, color: black },
-        { pos: tr, uv: uv, color: gray },
-        { pos: tl, uv: uv, color: gray },
-        { pos: tc, uv: uv, color: white }
-      ];
-
-      const indices = [
-        vArrOffset,
-        vArrOffset + 1,
-        vArrOffset + 2,
-        vArrOffset + 2,
-        vArrOffset + 4,
-        vArrOffset + 3,
-        vArrOffset + 3,
-        vArrOffset,
-        vArrOffset + 2
-      ];
-
-      return { verts, indices };
-    }
-
-
-function onMouseMove(event) {
-
-
-  if ( adtt.length>=pano.attributes.position.count-3) {
-
-
- let    intersects = raycaster.intersectObjects(adtt);
-   
-    for (let index = 0; index < intersects.length; index++) {
-
-console.log(intersects[index],"ius the mesh",intersects)
-let point=intersects[index]
-  // point.object.position.x += (Math.random() - 0.5) * 1;
-
-  point.object.material=particleMaterial
-
-
-  point.object.updateMatrixWorld(); // Ensure the matrix world is up-to-date
-  
-  // Create a new matrix and copy the world matrix of the geometry
-  let inverseMatrix = new THREE.Matrix4().copy(  point.object.matrixWorld).invert();
-
-  let markerLocalPosition = marker.position.clone().applyMatrix4(inverseMatrix);
-
-  particleMaterial.uniforms.uMousePosition.value=markerLocalPosition
-    }
-
-
-
-  }
-
-  if (event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2-1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    mouse.z=0
-  }
-  
-}
-    // Cleanup
-    return () => {
-      window.removeEventListener("mousemove",onMouseMove)
-
-
-      renderer.dispose();
-scene.clear();
-
-    };
-  }, []);
-
-
-
-  useEffect(() => {
-  console.log(aarr,"arrer")
-  }, )
-  
-
-
-  return <canvas ref={canvasRef} />;
-};
-
-export default DancingGrass; 
