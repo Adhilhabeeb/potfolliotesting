@@ -9,6 +9,8 @@ const DancingGrass = () => {
 const [adttar, setadttar] = useState([])
 let aarr=useRef()
   useEffect(() => {
+  let size=256
+let colors=[]
     // Scene Setup
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); // A plane facing the camera at z = 0
     const intersectionPoint = new THREE.Vector3();
@@ -35,6 +37,8 @@ let adtt=[]
     const PLANE_SIZE = 20;
 
     console.log(   (Math.round(Math.PI * PLANE_SIZE) * Math.PI) / 2.5 ,"pllll")
+  
+  
     let pano = new THREE.PlaneGeometry(
       PLANE_SIZE,
       PLANE_SIZE,
@@ -82,8 +86,129 @@ let adtt=[]
       
   //     return { points, uniforms };
   // }
+  ///image   setupfor  heightmap
+  let WIDTH,HEIGHT,data;
+function image() {
   
+  let IMAGE_SRC="../public/cann.png"
+    var image = new Image();
+    image.src = IMAGE_SRC;
 
+        
+let canvas;
+        // var canvas = document.createElement('canvas');
+        // canvas.width = WIDTH;
+        // canvas.height = HEIGHT;
+        // var context = canvas.getContext('2d');
+
+  // const position2Dir = (position) => {
+  //     const vector = new THREE.Vector3(position.x, position.y, position.z);
+  //     const length = vector.length();
+
+  //     const hd = Math.sqrt(position.x ** 2 + position.z ** 2) / length;
+  //     let h = Math.atan(position.y / length / hd) / Math.PI * 180 * -1;
+
+  //     let az = Math.atan(position.z / hd / (position.x / hd));
+  //     if (position.x < 0 && position.z > 0) az += Math.PI;
+  //     if (position.x < 0 && position.z < 0) az += Math.PI;
+  //     if (position.x > 0 && position.z < 0) az += Math.PI * 2;
+
+  //     az = (az / Math.PI) * 180;
+  //     if (isNaN(az)) az = 0;
+
+  //     return { az, h };
+  //   };
+
+
+  //  const getH = (dir, canvas) => {
+  //     dir.az = (360 - dir.az + 180) % 360;
+  //     const x = Math.floor((canvas.width * dir.az) / 360);
+  //     const y = Math.floor((canvas.height * (dir.h + 90)) / 180);
+  //     const ctx = canvas.getContext("2d");
+  //     const pixelData = ctx.getImageData(x, y, 1, 1).data;
+  //     return 200 + pixelData[0] / 5;
+  //   };
+    var texture = new THREE.Texture();
+  texture.image = image;
+ var material = new THREE.MeshBasicMaterial({
+    side: THREE.DoubleSide,
+    shading: THREE.SmoothShading,
+    map: texture
+  });
+  let geometry=new THREE.PlaneGeometry(50,50,size-1,size-1)
+    geometry.rotateX(-Math.PI / 2);
+  image.onload=()=>{
+ alert("load")
+ texture.needsUpdate = true;
+
+    canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+     const ctx = canvas.getContext("2d");
+      ctx.drawImage(image, 0, 0, size, size);
+      const imgData = ctx.getImageData(0, 0, size, size).data;
+    canvas.getContext('2d').drawImage(image, 0, 0,size, size);
+ let vertices = geometry.attributes.position;
+     
+   for (var i = 0, l =geometry.attributes.position.count; i < l; i++) {
+//         const xpl = vertices.getX(i);
+
+
+//         const ypl = vertices.getY(i);
+//         const zpl = vertices.getZ(i);
+//       let  dir = position2Dir(new THREE.Vector3(xpl,ypl,zpl));
+// // console.log(canvas,"vcannn"
+// // )
+//       var h = getH(dir,canvas);
+
+//       console.log(h,"hhhhhhhhhhhhhhhh")
+ 
+//       var vector = new THREE.Vector3(xpl,ypl,zpl)
+//     // console.log(vector,"j",h)
+//       vector.setLength(h);
+     
+//                 vertices.setXYZ(i,vector.x,vector.y,vector.z)
+  const x = i % size;
+        const y = Math.floor(i / size);
+        // console.log(i,size,Math.floor(i/size),"iio",i%size)
+
+        const pixelIndex = (y * size + x) * 4;
+        const r = imgData[pixelIndex];
+        const heightValue = r / 255;
+
+        console.log(heightValue,"heightvalue")
+        vertices.setY(i, heightValue *1.);
+
+           if (heightValue > 0.6) {
+          colors.push(0.1, 0.6, 0.1); // green
+        } else {
+          colors.push(1.0, 1.0, 0.0); // yellow
+        }
+      // geometry.vertices[i].x = vector.x;
+      // geometry.vertices[i].y = vector.y;
+      // geometry.vertices[i].z = vector.z;
+    }
+  let     mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh)
+  }
+   
+  //   mesh.position.y=2
+  //   console.log(plane,"ppp","plamne",materiall)
+
+    
+
+   
+    // mesh.rotation.x = - Math.PI / 2;
+    // mesh.matrixAutoUpdate  = false;
+    // mesh.updateMatrix();
+
+    // plane.computeFaceNormals();
+    // plane.computeVertexNormals();
+
+    // scene.add(mesh);
+}
+
+// image()
     let particleMaterial = new THREE.ShaderMaterial({
       vertexShader: `
           varying vec2 vUv;
@@ -269,17 +394,116 @@ let unifopm={
       return ((val - oldMin) * (newMax - newMin)) / (oldMax - oldMin) + newMin;
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     function generateField() {
-      const positions = [];
-      const uvs = [];
-      const indices = [];
-      const colors = [];
       const positionAttribute = pano.getAttribute("position");
 
-    
+        let IMAGE_SRC="../public/cann.png"
+    var image = new Image();
+    image.src = IMAGE_SRC;
+
+        
+let canvas;
+    var texture = new THREE.Texture();
+  texture.image = image;
+//  var material = new THREE.MeshBasicMaterial({
+//     side: THREE.DoubleSide,
+//     shading: THREE.SmoothShading,
+//     map: texture
+//   });
+   const positions = [];
+      const uvs = [];
+      const indices = [];
       const uvAttribute = pano.getAttribute("uv");
       let vertices = pano.attributes.position;
+
+ image.onload=()=>{
+  
+  alert("loaded")
+
+
+   texture.needsUpdate = true;
+
+    canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+
+
+  const ctx = canvas.getContext("2d");
+      ctx.drawImage(image, 0, 0, size, size);
+      const imgData = ctx.getImageData(0, 0, size, size).data;
+    canvas.getContext('2d').drawImage(image, 0, 0,size, size);
+
+
       for (let i = 0; i < BLADE_COUNT; i++) {
+
+
+function callimag(){
+  const x = i % size;
+        const y = Math.floor(i / size);
+        // console.log(i,size,Math.floor(i/size),"iio",i%size)
+
+        const pixelIndex = (y * size + x) * 4;
+        const r = imgData[pixelIndex];
+        const heightValue = r / 255;
+
+        console.log(heightValue,"heightvalue")
+        vertices.setY(i, heightValue *1.);
+
+           if (heightValue > 0.6) {
+          colors.push(0.1, 0.6, 0.1); // green
+        } else {
+          colors.push(1.0, 1.0, 0.0); // yellow
+        }
+
+
+       
+}
+callimag()
+
+
+
+
+
+
+
+
+
+
+
         const xpl = vertices.getX(i);
 
         const ypl = vertices.getY(i);
@@ -302,6 +526,28 @@ let unifopm={
         const y = r * Math.sin(theta);
 
         const pos = new THREE.Vector3(randomX, 0, randomY);
+        
+        // console.log("lengthhhhljgihwdgbkhfgbdg",pano.worldToLocal(pos.clone()))
+// const noGrassRadius = 2;
+// if (pos.length() < noGrassRadius) {
+//   continue; // Skip this blade
+// }
+let placewidth=1
+const exclusionSize = 10;
+if (
+  Math.abs(pos.x) < placewidth &&
+  Math.abs(pos.z) < exclusionSize
+) {
+  const myPlane = new THREE.Mesh(
+  new THREE.PlaneGeometry(placewidth+placewidth, exclusionSize+exclusionSize), // slightly smaller than the gap
+  new THREE.MeshBasicMaterial({ color: 'yellow', side: THREE.DoubleSide,vertexColors:true })
+);
+myPlane.rotation.x = -Math.PI / 2;
+myPlane.position.set(0, 0.01, 0); // y = 0.01 to float above grass
+scene.add(myPlane);
+
+  continue; // Inside square in center, skip
+}
 
         const uv = [
           convertRange(pos.x, surfaceMin, surfaceMax, 0, 1),
@@ -312,10 +558,21 @@ let unifopm={
         blade.verts.forEach((vert) => {
           positions.push(...vert.pos);
           uvs.push(...vert.uv);
-          colors.push(...vert.color);
+        
         });
         blade.indices.forEach((indice) => indices.push(indice));
       }
+
+
+ }
+   
+
+    
+     
+
+
+      
+    
 
       geom.setAttribute(
         "position",
