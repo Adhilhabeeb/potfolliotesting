@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import * as BufferGeometryUtils from "https://cdn.skypack.dev/three@0.136.0/examples/jsm/utils/BufferGeometryUtils.js";
-import heightmap from "./../public/cann.png";
+import heightmap from "./../public/water.png";
+import verttyre from "./shader/vert.glsl"
+import fragtyre from "./shader/frag.glsl"
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import grassTextureImg from "../public/grass1.webp";
@@ -12,6 +14,7 @@ const DancingGrass = () => {
   const size = 256;
 
   useEffect(() => {
+      const raycastertyre = new THREE.Raycaster();
     // Scene Setup
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); // A plane facing the camera at z = 0
     const intersectionPoint = new THREE.Vector3();
@@ -135,7 +138,7 @@ vDist=dist;
     );
     cube2.position.x = 3;
     cube2.position.y = 2;
-
+cube1.position.y=0.3
     scene.add(cube1, cube2);
     let unifopm = {
       mousePos: particleMaterial.uniforms.uMousePosition,
@@ -155,13 +158,13 @@ vDist=dist;
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enablePan = false;
-    controls.enableZoom = true;
-    controls.minPolarAngle = 1.1;
-    // controls.maxPolarAngle = 1.45;
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.1;
-    controls.target.set(0, 0, 0);
+    // controls.enablePan = false;
+    // controls.enableZoom = true;
+    // controls.minPolarAngle = 1.1;
+    // // controls.maxPolarAngle = 1.45;
+    // controls.enableDamping = true;
+    // controls.dampingFactor = 0.1;
+    // controls.target.set(0, 0, 0);
 
     // Camera
     camera.position.set(-7, 3, 7);
@@ -447,12 +450,12 @@ vDist=dist;
         blade.visible = false;
       
             checkblade(blade);
-            console.log("is vosisi", blade.id);
+            // console.log("is vosisi", blade.id);
 
             arrgrass.push(blade);
             vertices.setY(i, heightValue * 100);
           } else {
-            BLADE_HEIGHT = 0.1;
+            BLADE_HEIGHT = 0.7;
 
             const xpl = vertices.getX(i);
 
@@ -495,7 +498,7 @@ vDist=dist;
 
             ///
             blade.id = i;
-            console.log(blade.id);
+            // console.log(blade.id);
             const localPos = new THREE.Vector3(xpl, ypl, zpl);
             blade.localPos = localPos;
             //
@@ -533,7 +536,8 @@ vDist=dist;
         // geom.computeFaceNormals();
 
         grassmesh = new THREE.Mesh(geom, grassMaterial);
-
+        let scalesi=20
+grassmesh.scale.multiplyScalar(3)
         grassmesh.name = "grass";
 
         scene.add(grassmesh);
@@ -717,11 +721,71 @@ vDist=dist;
       }
     }
 
+    ///plane tryre  setip
+        const planeGeometry = new THREE.PlaneGeometry(PLANE_SIZE,PLANE_SIZE);
+    const planeMaterial = new THREE.ShaderMaterial({
+      extensions: { derivatives: "#extension GL_OES_standard_derivatives : enable" },
+      vertexShader: verttyre,
+      fragmentShader: fragtyre,
+      side: THREE.DoubleSide,
+      uniforms: {
+      umouse2:{ value: new THREE.Vector3(0, 0, 0) },
+        resolution: { value: new THREE.Vector4(0, 0, 0, 0) },
+        umouse: { value: new THREE.Vector3(0, 0, 0) }
+      },transparent:true
+    });
+    planeMaterial.uniforms.umouse.value=new THREE.Vector3(0, 0, 0);
+    planeMaterial.uniforms.umouse2.value=new THREE.Vector3(0, 0, 0);
+    const planetyre = new THREE.Mesh(planeGeometry, planeMaterial);
+// planetyre.visible=false
+    planetyre.rotation.x = Math.PI / 2; // Rotate the plane to be horizontal
+    planetyre.scale.multiplyScalar(3)
+    scene.add(planetyre);
+
+    //
+
     const animate = function () {
+      //tryemark
+
+
+      const origin2 = cube1.position.clone();
+const direction2 = new THREE.Vector3(0, -1, 0); // Downward
+direction2.normalize();
+
+raycastertyre.set(origin2, direction2);
+  const arrowHelper2 = new THREE.ArrowHelper(direction2, origin2, 2, "red");
+// scene.add(arrowHelper2);
+const intersects2 = raycastertyre.intersectObject(planetyre);
+if (intersects2.length > 0) {
+  const hit = intersects2[0];
+  console.log("Hit222222222 the plane at:", hit.point);
+
+  // Convert world hit point to plane local space
+  const localPoint = planetyre.worldToLocal(hit.point.clone());
+
+  // Convert to UV
+  // Your plane is 7x7, centered at origin => map -3.5 to +3.5 => UV (0 to 1)
+  const uv = new THREE.Vector2(
+    (localPoint.x + PLANE_SIZE/2) / PLANE_SIZE,
+    (localPoint.y +PLANE_SIZE/2) / PLANE_SIZE
+  );
+  
+
+  planetyre.material.uniforms.umouse2.value.set(uv.x - 0.5, uv.y - 0.5, 0);
+}
+ else {
+  console.log("No intersection with plane    intt22222");
+}
+
+      //
       const elapsedTime = Date.now() - startTime;
       controls.update();
-cube1.position.x=Math.sin(elapsedTime)
+// cube1.position.x=Math.sin(elapsedTime)
       let t = clock.getElapsedTime();
+        const amplitude = 0.4; // how far the cube moves left-right
+  const speed = 0.4;    
+      cube1.position.x = Math.sin(t * speed) * amplitude;
+  cube1.position.z = Math.cos(t * speed) * amplitude;
       marker.position.x = Math.sin(t * 0.5) * 5;
       marker.position.y = Math.cos(t * 0.3) * 5;
       marker.position.z = Math.cos(t * 0.3) * 5;
@@ -741,20 +805,20 @@ cube1.position.x=Math.sin(elapsedTime)
   const carPos = new THREE.Vector3();
   cube1.getWorldPosition(carPos);
 
-  const exclusionRadius = 1.5; // Adjust to your needs
+  const exclusionRadius = 3; // Adjust to your needs
 
   // Clear and re-assign indices based on visibility
   indices.length = 0;
 
   arrgrass.forEach((blade) => {
     // Convert blade localPos to world position
-    const worldBladePos = grassmesh.localToWorld(blade.localPos.clone());
+    const worldBladePos = grassmesh.localToWorld(new THREE.Vector3(blade.localPos.clone().x,0,blade.localPos.clone().y));
 
     const distance = worldBladePos.distanceTo(carPos);
 const dx = Math.abs(worldBladePos.x - carPos.x);
 const dz = Math.abs(worldBladePos.z - carPos.z);
 
-const squareSize = 0.5; // Half-size of the square area
+const squareSize = 0.9; // Half-size of the square area
     if (distance < exclusionRadius) {   //ciecleif
     // if (   dx < 2 && dz < squareSize/20) { 
       blade.visible = false;
