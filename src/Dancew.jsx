@@ -4,16 +4,36 @@ import * as BufferGeometryUtils from "https://cdn.skypack.dev/three@0.136.0/exam
 import heightmap from "./../public/water.png";
 import verttyre from "./shader/vert.glsl"
 import fragtyre from "./shader/frag.glsl"
-
+import { Sky } from "three/examples/jsm/Addons.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import grassTextureImg from "../public/grass1.webp";
-const DancingGrass = () => {
+import InitRapier from "./physics/initRapier";
+import { GRAVITY } from "./physics/Constants";
+
+  let RAPIER,physicsWorld,physicsObjects
+let initengine= async()=>{
+
+     RAPIER = await InitRapier()
+  physicsWorld = new RAPIER.World(GRAVITY)
+  physicsObjects = [] // initializing physics objects array
+}
+const DancingGrass =  () => {
   const canvasRef = useRef(null);
   const [adttar, setadttar] = useState([]);
   let aarr = useRef();
   const size = 256;
 
-  useEffect(() => {
+  useEffect( () => {
+    
+    ///PHYSICS
+
+
+initengine()
+
+
+
+
+    ///
       const raycastertyre = new THREE.Raycaster();
     // Scene Setup
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); // A plane facing the camera at z = 0
@@ -29,8 +49,10 @@ const DancingGrass = () => {
     let arrgrass = [];
     let adtt = [];
     const scene = new THREE.Scene();
+    let sky,sun;
+
     const camera = new THREE.PerspectiveCamera(
-      50,
+      35,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
@@ -38,7 +60,7 @@ const DancingGrass = () => {
     const geom = new THREE.BufferGeometry();
 
     // Parameters
-    const PLANE_SIZE = 20;
+    const PLANE_SIZE =20;
 
     // console.log(   (Math.round(Math.PI * PLANE_SIZE) * Math.PI) / 2.5 ,"pllll")
     let pano = new THREE.PlaneGeometry(
@@ -130,7 +152,7 @@ vDist=dist;
     });
     let cube1 = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1),
-      new THREE.MeshBasicMaterial({ color: "red" })
+      new THREE.MeshBasicMaterial({ color: "yellow" })
     );
     let cube2 = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1),
@@ -155,7 +177,38 @@ cube1.position.y=0.3
     });
 
     renderer.setSize(window.innerWidth, window.innerHeight);
+function initSky() {
 
+				// Add Sky
+				sky = new Sky();
+				sky.scale.setScalar( 450000 );
+				scene.add( sky );
+
+				sun = new THREE.Vector3();
+
+				/// GUI
+
+				const effectController = {
+					turbidity: 10,
+					rayleigh: 3,
+					mieCoefficient: 0.005,
+					mieDirectionalG: 0.7,
+					elevation: 2,
+					azimuth: 180,
+					exposure: renderer.toneMappingExposure
+				};
+        const uniforms = sky.material.uniforms;
+        const phi = THREE.MathUtils.degToRad( 90 - effectController.elevation );
+					const theta = THREE.MathUtils.degToRad( effectController.azimuth );
+
+					sun.setFromSphericalCoords( 1, phi, theta );
+
+					uniforms[ 'sunPosition' ].value.copy( sun );
+
+					renderer.toneMappingExposure = effectController.exposure;
+					renderer.render( scene, camera );
+      }
+      initSky()
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     // controls.enablePan = false;
@@ -167,8 +220,8 @@ cube1.position.y=0.3
     // controls.target.set(0, 0, 0);
 
     // Camera
-    camera.position.set(-7, 3, 7);
-    camera.lookAt(controls.target);
+    camera.position.set(-7, 7, 15);
+    // camera.lookAt(controls.target);
     // camera.setFocalLength(15);
 
     // Grass Texture
@@ -236,6 +289,9 @@ cube1.position.y=0.3
       vertexColors: true,
       side: THREE.DoubleSide,
     });
+
+    
+    
     let marker = new THREE.Mesh(
       new THREE.SphereGeometry(0.5, 16, 8),
       new THREE.MeshBasicMaterial({ color: "red", wireframe: true })
@@ -383,7 +439,7 @@ cube1.position.y=0.3
         // const mesh = new THREE.Mesh(geometry, material);
         // scene.add(mesh);
 
-        for (let i = 0; i < BLADE_COUNT; i++) {
+        for (let i = 0; i < BLADE_COUNT*10; i++) {
           function callikg(params) {
             const x = i % size;
             const y = Math.floor(i / size);
@@ -745,10 +801,23 @@ grassmesh.scale.multiplyScalar(3)
     //
 
     const animate = function () {
-      //tryemark
+   
+      const elapsedTime = Date.now() - startTime;
+      controls.update();
+// cube1.position.x=Math.sin(elapsedTime)
+      let t = clock.getElapsedTime();
+        const amplitude= 4; // how far the cube moves left-right
+  const speed = 0.4;    
+      cube1.position.x = Math.tan(t * speed) * amplitude;
+  cube1.position.z = Math.cos(t * speed) * amplitude; 
+  
+  //tryemark
 
 
       const origin2 = cube1.position.clone();
+//    camera.position.copy(origin2.multiplyScalar(20))
+// camera.position.y=camera.position.y*1.3
+      // camera.lookAt(origin2.clone())
 const direction2 = new THREE.Vector3(0, -1, 0); // Downward
 direction2.normalize();
 
@@ -778,14 +847,6 @@ if (intersects2.length > 0) {
 }
 
       //
-      const elapsedTime = Date.now() - startTime;
-      controls.update();
-// cube1.position.x=Math.sin(elapsedTime)
-      let t = clock.getElapsedTime();
-        const amplitude = 0.4; // how far the cube moves left-right
-  const speed = 0.4;    
-      cube1.position.x = Math.sin(t * speed) * amplitude;
-  cube1.position.z = Math.cos(t * speed) * amplitude;
       marker.position.x = Math.sin(t * 0.5) * 5;
       marker.position.y = Math.cos(t * 0.3) * 5;
       marker.position.z = Math.cos(t * 0.3) * 5;
@@ -877,3 +938,9 @@ const squareSize = 0.9; // Half-size of the square area
 };
 
 export default DancingGrass;
+export { RAPIER }
+// export const useGltfLoader = () => gltfLoader
+// export const useTextureLoader = () => textureLoader
+// export const useLoader = () => generalLoader
+export const usePhysics = () => physicsWorld
+export const usePhysicsObjects = () => physicsObjects
