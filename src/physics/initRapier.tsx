@@ -11,9 +11,11 @@ export type PhysicsObject = {
   fn?: Function
   autoAnimate: boolean
 }
-
+   export function trest(params:any) {
+    console.log(RAPIER,"Rwpirertr")
+}
 const InitRapier = async () => {
-
+// console.log(RAPIER,"istherapier")
   const mod = await import('@dimforge/rapier3d')
   const RAPIER = await mod.default
 
@@ -39,7 +41,7 @@ export const addPhysics = (
   // * Responsible for collision response
   const rigidBody = physics.createRigidBody(rigidBodyDesc)
 
-  let colliderDesc
+  let colliderDesc:any;
 
   switch (colliderType) {
     case 'cuboid':

@@ -7,16 +7,19 @@ import fragtyre from "./shader/frag.glsl"
 import { Sky } from "three/examples/jsm/Addons.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import grassTextureImg from "../public/grass1.webp";
-import InitRapier from "./physics/initRapier";
+import InitRapier, { addPhysics, trest } from "./physics/initRapier";
 import { GRAVITY } from "./physics/Constants";
-
+import Stats from 'three/examples/jsm/libs/stats.module'
   let RAPIER,physicsWorld,physicsObjects
-let initengine= async()=>{
+
 
      RAPIER = await InitRapier()
+
+     console.log(RAPIER,"is8976586758967")
   physicsWorld = new RAPIER.World(GRAVITY)
   physicsObjects = [] // initializing physics objects array
-}
+
+
 const DancingGrass =  () => {
   const canvasRef = useRef(null);
   const [adttar, setadttar] = useState([]);
@@ -24,11 +27,12 @@ const DancingGrass =  () => {
   const size = 256;
 
   useEffect( () => {
-    
+const stats = Stats()
+document.body.appendChild(stats.dom)
     ///PHYSICS
 
 
-initengine()
+trest()
 
 
 
@@ -52,7 +56,7 @@ initengine()
     let sky,sun;
 
     const camera = new THREE.PerspectiveCamera(
-      35,
+      55,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
@@ -296,7 +300,7 @@ function initSky() {
       new THREE.SphereGeometry(0.5, 16, 8),
       new THREE.MeshBasicMaterial({ color: "red", wireframe: true })
     );
-    scene.add(marker);
+    // scene.add(marker);
     generateField();
     let clock = new THREE.Clock();
 
@@ -439,7 +443,7 @@ function initSky() {
         // const mesh = new THREE.Mesh(geometry, material);
         // scene.add(mesh);
 
-        for (let i = 0; i < BLADE_COUNT*10; i++) {
+        for (let i = 0; i < BLADE_COUNT; i++) {
           function callikg(params) {
             const x = i % size;
             const y = Math.floor(i / size);
@@ -586,14 +590,16 @@ function initSky() {
           "color",
           new THREE.BufferAttribute(new Float32Array(colors), 3)
         );
+      
         geom.setIndex(indices);
         let plka = new THREE.PlaneGeometry(2, 2);
         // geom.computeVertexNormals();
         // geom.computeFaceNormals();
 
-        grassmesh = new THREE.Mesh(geom, grassMaterial);
+        grassmesh = new THREE.InstancedMesh(geom, grassMaterial,10);
         let scalesi=20
-grassmesh.scale.multiplyScalar(3)
+grassmesh.scale.multiplyScalar(9)
+console.log(grassmesh.scale)
         grassmesh.name = "grass";
 
         scene.add(grassmesh);
@@ -795,108 +801,146 @@ grassmesh.scale.multiplyScalar(3)
     const planetyre = new THREE.Mesh(planeGeometry, planeMaterial);
 // planetyre.visible=false
     planetyre.rotation.x = Math.PI / 2; // Rotate the plane to be horizontal
-    planetyre.scale.multiplyScalar(3)
+    planetyre.scale.multiplyScalar(9)
     scene.add(planetyre);
-
+ const collider = addPhysics(
+      planetyre,
+      'fixed',
+      true,
+      () => {
+        planetyre.rotation.x -= Math.PI / 2
+      },
+      'cuboid',
+      {
+        width: PLANE_SIZE / 2,
+        height: 0.001,
+        depth: PLANE_SIZE / 2,
+      }
+    ).collider
     //
 
+console.log(collider,"cciiiidcvdvdv ")
+
+
+////small ghrsaas
+function smallgra(){
+           const v1 = new THREE.Vector3(0, 0, 0);
+    const v2 = new THREE.Vector3(1, 0, 0); // Example: 1 unit along X-axis
+    const v3 = new THREE.Vector3(0.5, 1, 0); // Example: 0.5 units along X, 1 unit along Y
+    const geometry = new THREE.BufferGeometry();    const positions = new Float32Array([
+        v1.x, v1.y, v1.z,
+        v2.x, v2.y, v2.z,
+        v3.x, v3.y, v3.z
+    ]);
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide }); // Green color, render both sides
+
+
+
+
+
+
+
+  }
+
+////small ghrsaas
+
     const animate = function () {
-   
+    stats.update()
       const elapsedTime = Date.now() - startTime;
-      controls.update();
+      // controls.update();
 // cube1.position.x=Math.sin(elapsedTime)
       let t = clock.getElapsedTime();
-        const amplitude= 4; // how far the cube moves left-right
+        const amplitude= 9; // how far the cube moves left-right
   const speed = 0.4;    
       cube1.position.x = Math.tan(t * speed) * amplitude;
   cube1.position.z = Math.cos(t * speed) * amplitude; 
   
-  //tryemark
+//   //tryemark
 
 
-      const origin2 = cube1.position.clone();
-//    camera.position.copy(origin2.multiplyScalar(20))
-// camera.position.y=camera.position.y*1.3
-      // camera.lookAt(origin2.clone())
-const direction2 = new THREE.Vector3(0, -1, 0); // Downward
-direction2.normalize();
+//       const origin2 = cube1.position.clone();
+//   //  camera.position.copy(origin2.multiplyScalar(20))
+// camera.position.y=4*1.3
+//       camera.lookAt(origin2.clone())
+// const direction2 = new THREE.Vector3(0, -1, 0); // Downward
+// direction2.normalize();
 
-raycastertyre.set(origin2, direction2);
-  const arrowHelper2 = new THREE.ArrowHelper(direction2, origin2, 2, "red");
-// scene.add(arrowHelper2);
-const intersects2 = raycastertyre.intersectObject(planetyre);
-if (intersects2.length > 0) {
-  const hit = intersects2[0];
-  console.log("Hit222222222 the plane at:", hit.point);
+// raycastertyre.set(origin2, direction2);
+//   const arrowHelper2 = new THREE.ArrowHelper(direction2, origin2, 2, "red");
+// // scene.add(arrowHelper2);
+// const intersects2 = raycastertyre.intersectObject(planetyre);
+// if (intersects2.length > 0) {
+//   const hit = intersects2[0];
+//   // console.log("Hit222222222 the plane at:", hit.point);
 
-  // Convert world hit point to plane local space
-  const localPoint = planetyre.worldToLocal(hit.point.clone());
+//   // Convert world hit point to plane local space
+//   const localPoint = planetyre.worldToLocal(hit.point.clone());
 
-  // Convert to UV
-  // Your plane is 7x7, centered at origin => map -3.5 to +3.5 => UV (0 to 1)
-  const uv = new THREE.Vector2(
-    (localPoint.x + PLANE_SIZE/2) / PLANE_SIZE,
-    (localPoint.y +PLANE_SIZE/2) / PLANE_SIZE
-  );
+//   // Convert to UV
+//   // Your plane is 7x7, centered at origin => map -3.5 to +3.5 => UV (0 to 1)
+//   const uv = new THREE.Vector2(
+//     (localPoint.x + PLANE_SIZE/2) / PLANE_SIZE,
+//     (localPoint.y +PLANE_SIZE/2) / PLANE_SIZE
+//   );
   
 
-  planetyre.material.uniforms.umouse2.value.set(uv.x - 0.5, uv.y - 0.5, 0);
-}
- else {
-  console.log("No intersection with plane    intt22222");
-}
+//   planetyre.material.uniforms.umouse2.value.set(uv.x - 0.5, uv.y - 0.5, 0);
+// }
+//  else {
+//   console.log("No intersection with plane    intt22222");
+// }
 
-      //
-      marker.position.x = Math.sin(t * 0.5) * 5;
-      marker.position.y = Math.cos(t * 0.3) * 5;
-      marker.position.z = Math.cos(t * 0.3) * 5;
-      raycaster.ray.intersectPlane(plane, intersectionPoint);
+//       //
+//       marker.position.x = Math.sin(t * 0.5) * 5;
+//       marker.position.y = Math.cos(t * 0.3) * 5;
+//       marker.position.z = Math.cos(t * 0.3) * 5;
+//       raycaster.ray.intersectPlane(plane, intersectionPoint);
 
-      // Move marker to the intersection point
-      marker.position.copy(intersectionPoint);
-      raycaster.setFromCamera(mouse, camera);
+//       // Move marker to the intersection point
+//       marker.position.copy(intersectionPoint);
+//       raycaster.setFromCamera(mouse, camera);
 
-      grassUniforms.iTime.value = elapsedTime;
-      particleMaterial.uniforms.uTime.value = elapsedTime;
-      particleMaterial.uniforms.uMousePosition.value = marker.position;
-      // raycaster.set(marker.position, new THREE.Vector3(0, -1, 0)); // Casting downward
+//       grassUniforms.iTime.value = elapsedTime;
+//       particleMaterial.uniforms.uTime.value = elapsedTime;
+//       particleMaterial.uniforms.uMousePosition.value = marker.position;
+//       // raycaster.set(marker.position, new THREE.Vector3(0, -1, 0)); // Casting downward
 
-      //
-   if (arrgrass.length > 1000) {
-  const carPos = new THREE.Vector3();
-  cube1.getWorldPosition(carPos);
+//       //
+//    if (arrgrass.length > 1000) {
+//   const carPos = new THREE.Vector3();
+//   cube1.getWorldPosition(carPos);
 
-  const exclusionRadius = 3; // Adjust to your needs
+//   const exclusionRadius = 3; // Adjust to your needs
 
-  // Clear and re-assign indices based on visibility
-  indices.length = 0;
+//   // Clear and re-assign indices based on visibility
+//   indices.length = 0;
 
-  arrgrass.forEach((blade) => {
-    // Convert blade localPos to world position
-    const worldBladePos = grassmesh.localToWorld(new THREE.Vector3(blade.localPos.clone().x,0,blade.localPos.clone().y));
+//   arrgrass.forEach((blade) => {
+//     // Convert blade localPos to world position
+//     const worldBladePos = grassmesh.localToWorld(new THREE.Vector3(blade.localPos.clone().x,0,blade.localPos.clone().y));
 
-    const distance = worldBladePos.distanceTo(carPos);
-const dx = Math.abs(worldBladePos.x - carPos.x);
-const dz = Math.abs(worldBladePos.z - carPos.z);
+//     const distance = worldBladePos.distanceTo(carPos);
+// const dx = Math.abs(worldBladePos.x - carPos.x);
+// const dz = Math.abs(worldBladePos.z - carPos.z);
 
-const squareSize = 0.9; // Half-size of the square area
-    if (distance < exclusionRadius) {   //ciecleif
-    // if (   dx < 2 && dz < squareSize/20) { 
-      blade.visible = false;
-    } else {
-//  checkblade(blade)
+// const squareSize = 0.9; // Half-size of the square area
+//     if (distance < exclusionRadius) {   //ciecleif
+//     // if (   dx < 2 && dz < squareSize/20) { 
+//       blade.visible = false;
+//     } else {
+// //  checkblade(blade)
 
-  blade.indices.forEach((indice) => indices.push(indice));
-        blade.visible = false;
-    }
-  });
+//   blade.indices.forEach((indice) => indices.push(indice));
+//         blade.visible = false;
+//     }
+//   });
 
-  // Update the index buffer so the mesh redraws only visible blades
-  grassmesh.geometry.setIndex(indices);
-  grassmesh.geometry.attributes.position.needsUpdate = true;
-  grassmesh.geometry.attributes.uv.needsUpdate = true;
-  grassmesh.geometry.attributes.color.needsUpdate = true;
-}
+//   // Update the index buffer so the mesh redraws only visible blades
+//   grassmesh.geometry.setIndex(indices);
+//   grassmesh.geometry.attributes.position.needsUpdate = true;
+//   grassmesh.geometry.attributes.uv.needsUpdate = true;
+//   grassmesh.geometry.attributes.color.needsUpdate = true;
+// }
 
       // cube2.position.x+=Math.sin(elapsedTime*0.1)
       //  console.log(  cube1.position.distanceTo(cube1.position),"is the distnce")
@@ -923,24 +967,24 @@ const squareSize = 0.9; // Half-size of the square area
     animate();
     // Cleanup
     return () => {
-      window.removeEventListener("mousemove", onMouseMove);
+      // window.removeEventListener("mousemove", onMouseMove);
 
       renderer.dispose();
       scene.clear();
     };
   }, []);
 
-  useEffect(() => {
-    // console.log(aarr,"arrer")
-  });
+
 
   return <canvas ref={canvasRef} />;
 };
 
 export default DancingGrass;
+
+console.log(RAPIER,"rrrrrrrrrrrrrrrrrrrrrrrrrrr")
 export { RAPIER }
 // export const useGltfLoader = () => gltfLoader
 // export const useTextureLoader = () => textureLoader
 // export const useLoader = () => generalLoader
-export const usePhysics = () => physicsWorld
-export const usePhysicsObjects = () => physicsObjects
+export const usePhysics =  () =>   physicsWorld;
+export const usePhysicsObjects =  () =>   physicsObjects;
