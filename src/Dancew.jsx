@@ -10,14 +10,31 @@ import grassTextureImg from "../public/grass1.webp";
 import InitRapier, { addPhysics, trest } from "./physics/initRapier";
 import { GRAVITY } from "./physics/Constants";
 import Stats from 'three/examples/jsm/libs/stats.module'
-  let RAPIER,physicsWorld,physicsObjects
+import { Loopenine } from "./loop";
+
+    let renderer,scene
+ async function initengine (){
+let      RAPIER = await InitRapier()
 
 
-     RAPIER = await InitRapier()
+    //  console.log(RAPIER,"is8976586758967")
+  let  physicsWorld = new RAPIER.World(GRAVITY)
+  let  physicsObjects = [] // initializing physics objects array
 
-     console.log(RAPIER,"is8976586758967")
-  physicsWorld = new RAPIER.World(GRAVITY)
-  physicsObjects = [] // initializing physics objects array
+  console.log("inffugugdugcihwdgc",RAPIER)
+  return {RAPIER,physicsObjects,physicsWorld}
+
+
+}
+
+let {RAPIER,physicsObjects,physicsWorld}=   await initengine()
+
+  //    RAPIER = await InitRapier()
+
+     console.log(RAPIER,"is8976586758967,")
+
+  // physicsWorld = new RAPIER.World(GRAVITY)
+  // physicsObjects = [] // initializing physics objects array
 
 
 const DancingGrass =  () => {
@@ -52,14 +69,14 @@ trest()
 
     let arrgrass = [];
     let adtt = [];
-    const scene = new THREE.Scene();
+     scene = new THREE.Scene();
     let sky,sun;
 
     const camera = new THREE.PerspectiveCamera(
-      55,
+      90,
       window.innerWidth / window.innerHeight,
       0.1,
-      1000
+      5000
     );
     const geom = new THREE.BufferGeometry();
 
@@ -175,12 +192,53 @@ cube1.position.y=0.3
     const BLADE_WIDTH = 0.1;
     let BLADE_HEIGHT = 0.8;
     const BLADE_HEIGHT_VARIATION = 0.6;
-    const renderer = new THREE.WebGLRenderer({
+     renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
       antialias: true,
     });
 
     renderer.setSize(window.innerWidth, window.innerHeight);
+//tpp camera functuin
+function Tppcamera(camera, target) {
+  let currentposition = new THREE.Vector3();
+  let currentlookat = new THREE.Vector3();
+
+  function calculateoffset() {
+    // Typical offset for a third-person camera: behind and above the target
+    let idealoffset = new THREE.Vector3(0, 12, 12); // back 10 units, up 5
+    idealoffset.applyQuaternion(target.quaternion);
+    idealoffset.add(target.position);
+    return idealoffset;
+  }
+
+  function calculatelookat() {
+    // Look slightly above the target's position
+    let ideallookat = new THREE.Vector3(0, 5, 4); // 3,4
+    ideallookat.applyQuaternion(target.quaternion);
+    ideallookat.add(target.position);
+    return ideallookat;
+  }
+
+  function updatec(deltaTime) {
+    let idealoffset = calculateoffset();
+    let ideallookat = calculatelookat();
+
+    currentposition.copy(idealoffset);
+    currentlookat.copy(ideallookat);
+
+    camera.position.copy(currentposition);
+    camera.lookAt(currentlookat); // 🔥 Don’t forget this!
+  }
+
+  return { updatec };
+}
+
+
+let {updatec} =Tppcamera(camera,cube1)
+console.log(updatec,"iiiiiiiii")
+//
+
+
 function initSky() {
 
 				// Add Sky
@@ -270,7 +328,7 @@ function initSky() {
       // // cloudUV.y += iTime / 10000.;
     
       vec4 worldPosition = vec4(cpos, 1.);
-      vec4 mvPosition = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      vec4 mvPosition = projectionMatrix * modelViewMatrix * vec4(cpos, 1.0);
       gl_Position = mvPosition;
     }`,
       fragmentShader: ` uniform sampler2D texture1;
@@ -462,7 +520,7 @@ function initSky() {
           if (heightValue > 0.6) {
             // console.log("green",heightValue)
 
-            BLADE_HEIGHT = 0.8;
+            BLADE_HEIGHT = 0.6;
 
             const xpl = vertices.getX(i);
 
@@ -515,7 +573,7 @@ function initSky() {
             arrgrass.push(blade);
             vertices.setY(i, heightValue * 100);
           } else {
-            BLADE_HEIGHT = 0.7;
+            BLADE_HEIGHT = 0.5;
 
             const xpl = vertices.getX(i);
 
@@ -596,18 +654,52 @@ function initSky() {
         // geom.computeVertexNormals();
         // geom.computeFaceNormals();
 
-        grassmesh = new THREE.InstancedMesh(geom, grassMaterial,10);
-        let scalesi=20
-grassmesh.scale.multiplyScalar(9)
-console.log(grassmesh.scale)
-        grassmesh.name = "grass";
+//         grassmesh = new THREE.Mesh(geom, grassMaterial);
+      
+// //         let scalesi=20
+// grassmesh.scale.multiplyScalar(9)
+// // grassmesh.scale.x=3
+// // grassmesh.scale.z=3
 
-        scene.add(grassmesh);
+// // console.log(grassmesh.scale)
+//         grassmesh.name = "grass";
+
+        // scene.add(grassmesh);
       });
 
       // glassgrid(positions,uvs,colors)
     }
+ const _addCubeMesh = (pos) => {
+    // * Settings
+    const size = 6
 
+    // * Mesh
+    const geometry = new THREE.BoxGeometry(size, size, size)
+    const material = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color().setHex(Math.min(Math.random() + 0.15, 1) ),
+      side: THREE.DoubleSide,
+    })
+    const cube = new THREE.Mesh(geometry, material)
+
+    cube.position.copy(pos)
+    cube.position.y += 2
+
+    // * Physics
+    const collider = addPhysics(cube, 'dynamic', true, undefined, 'cuboid', {
+      width: size / 2,
+      height: size / 2,
+      depth: size / 2,
+    }).collider
+
+    // * Add the mesh to the scene
+    scene.add(cube)
+  }
+   const NUM_CUBES = 10
+  for (let i = 0; i < NUM_CUBES; i++) {
+    _addCubeMesh(
+      new THREE.Vector3((Math.random() - 0.5) * 20, 10 + i * 5, (Math.random() - 0.5) * 20)
+    )
+  }
     function checkblade(blade) {
      
     }
@@ -819,7 +911,7 @@ console.log(grassmesh.scale)
     ).collider
     //
 
-console.log(collider,"cciiiidcvdvdv ")
+// console.log(collider,"cciiiidcvdvdv ")
 
 
 ////small ghrsaas
@@ -846,73 +938,80 @@ function smallgra(){
 
     const animate = function () {
     stats.update()
+    Loopenine()
       const elapsedTime = Date.now() - startTime;
       // controls.update();
 // cube1.position.x=Math.sin(elapsedTime)
       let t = clock.getElapsedTime();
-        const amplitude= 9; // how far the cube moves left-right
+      updatec(t*0.001)
+        const amplitude= 7; // how far the cube moves left-right
+   
   const speed = 0.4;    
-      cube1.position.x = Math.tan(t * speed) * amplitude;
-  cube1.position.z = Math.cos(t * speed) * amplitude; 
+      cube1.position.x = Math.cos(t * speed) * Math.floor(amplitude);
+  cube1.position.z = Math.cos(t * speed) * Math.floor(amplitude); 
   
 //   //tryemark
 
 
-//       const origin2 = cube1.position.clone();
-//   //  camera.position.copy(origin2.multiplyScalar(20))
+      const origin2 = cube1.position.clone();
+  //  camera.position.copy(origin2.multiplyScalar(20))
 // camera.position.y=4*1.3
-//       camera.lookAt(origin2.clone())
-// const direction2 = new THREE.Vector3(0, -1, 0); // Downward
-// direction2.normalize();
+      // camera.lookAt(origin2.clone())
 
-// raycastertyre.set(origin2, direction2);
-//   const arrowHelper2 = new THREE.ArrowHelper(direction2, origin2, 2, "red");
-// // scene.add(arrowHelper2);
-// const intersects2 = raycastertyre.intersectObject(planetyre);
-// if (intersects2.length > 0) {
-//   const hit = intersects2[0];
-//   // console.log("Hit222222222 the plane at:", hit.point);
+      //camera pdate
 
-//   // Convert world hit point to plane local space
-//   const localPoint = planetyre.worldToLocal(hit.point.clone());
+      ///
+const direction2 = new THREE.Vector3(0, -1, 0); // Downward
+direction2.normalize();
 
-//   // Convert to UV
-//   // Your plane is 7x7, centered at origin => map -3.5 to +3.5 => UV (0 to 1)
-//   const uv = new THREE.Vector2(
-//     (localPoint.x + PLANE_SIZE/2) / PLANE_SIZE,
-//     (localPoint.y +PLANE_SIZE/2) / PLANE_SIZE
-//   );
+raycastertyre.set(origin2, direction2);
+  const arrowHelper2 = new THREE.ArrowHelper(direction2, origin2, 2, "red");
+// scene.add(arrowHelper2);
+const intersects2 = raycastertyre.intersectObject(planetyre);
+if (intersects2.length > 0) {
+  const hit = intersects2[0];
+  // console.log("Hit222222222 the plane at:", hit.point);
+
+  // Convert world hit point to plane local space
+  const localPoint = planetyre.worldToLocal(hit.point.clone());
+
+  // Convert to UV
+  // Your plane is 7x7, centered at origin => map -3.5 to +3.5 => UV (0 to 1)
+  const uv = new THREE.Vector2(
+    (localPoint.x + PLANE_SIZE/2) / PLANE_SIZE,
+    (localPoint.y +PLANE_SIZE/2) / PLANE_SIZE
+  );
   
 
-//   planetyre.material.uniforms.umouse2.value.set(uv.x - 0.5, uv.y - 0.5, 0);
-// }
-//  else {
-//   console.log("No intersection with plane    intt22222");
-// }
+  planetyre.material.uniforms.umouse2.value.set(uv.x - 0.5, uv.y - 0.5, 0);
+}
+ else {
+  console.log("No intersection with plane    intt22222");
+}
 
 //       //
-//       marker.position.x = Math.sin(t * 0.5) * 5;
-//       marker.position.y = Math.cos(t * 0.3) * 5;
-//       marker.position.z = Math.cos(t * 0.3) * 5;
-//       raycaster.ray.intersectPlane(plane, intersectionPoint);
+      marker.position.x = Math.sin(t * 0.5) * 5;
+      marker.position.y = Math.cos(t * 0.3) * 5;
+      marker.position.z = Math.cos(t * 0.3) * 5;
+      raycaster.ray.intersectPlane(plane, intersectionPoint);
 
-//       // Move marker to the intersection point
-//       marker.position.copy(intersectionPoint);
-//       raycaster.setFromCamera(mouse, camera);
+      // Move marker to the intersection point
+      marker.position.copy(intersectionPoint);
+      raycaster.setFromCamera(mouse, camera);
 
-//       grassUniforms.iTime.value = elapsedTime;
-//       particleMaterial.uniforms.uTime.value = elapsedTime;
-//       particleMaterial.uniforms.uMousePosition.value = marker.position;
-//       // raycaster.set(marker.position, new THREE.Vector3(0, -1, 0)); // Casting downward
+      grassUniforms.iTime.value = elapsedTime;
+      particleMaterial.uniforms.uTime.value = elapsedTime;
+      particleMaterial.uniforms.uMousePosition.value = marker.position;
+      // raycaster.set(marker.position, new THREE.Vector3(0, -1, 0)); // Casting downward
 
-//       //
+      //
 //    if (arrgrass.length > 1000) {
 //   const carPos = new THREE.Vector3();
 //   cube1.getWorldPosition(carPos);
 
-//   const exclusionRadius = 3; // Adjust to your needs
+//   const exclusionRadius = 6; // Adjust to your needs
 
-//   // Clear and re-assign indices based on visibility
+// //   // Clear and re-assign indices based on visibility
 //   indices.length = 0;
 
 //   arrgrass.forEach((blade) => {
@@ -923,7 +1022,7 @@ function smallgra(){
 // const dx = Math.abs(worldBladePos.x - carPos.x);
 // const dz = Math.abs(worldBladePos.z - carPos.z);
 
-// const squareSize = 0.9; // Half-size of the square area
+// const squareSize = 1.5; // Half-size of the square area
 //     if (distance < exclusionRadius) {   //ciecleif
 //     // if (   dx < 2 && dz < squareSize/20) { 
 //       blade.visible = false;
@@ -935,7 +1034,8 @@ function smallgra(){
 //     }
 //   });
 
-//   // Update the index buffer so the mesh redraws only visible blades
+
+// //   // Update the index buffer so the mesh redraws only visible blades
 //   grassmesh.geometry.setIndex(indices);
 //   grassmesh.geometry.attributes.position.needsUpdate = true;
 //   grassmesh.geometry.attributes.uv.needsUpdate = true;
@@ -988,3 +1088,6 @@ export { RAPIER }
 // export const useLoader = () => generalLoader
 export const usePhysics =  () =>   physicsWorld;
 export const usePhysicsObjects =  () =>   physicsObjects;
+
+export const userenderer=()=>renderer
+export const usescene=()=>scene
