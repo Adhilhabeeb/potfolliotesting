@@ -21,7 +21,7 @@ let      RAPIER = await InitRapier()
   let  physicsWorld = new RAPIER.World(GRAVITY)
   let  physicsObjects = [] // initializing physics objects array
 
-  console.log("inffugugdugcihwdgc",RAPIER)
+  // console.log("inffugugdugcihwdgc",RAPIER)
   return {RAPIER,physicsObjects,physicsWorld}
 
 
@@ -31,7 +31,7 @@ let {RAPIER,physicsObjects,physicsWorld}=   await initengine()
 
   //    RAPIER = await InitRapier()
 
-     console.log(RAPIER,"is8976586758967,")
+    //  console.log(RAPIER,"is8976586758967,")
 
   // physicsWorld = new RAPIER.World(GRAVITY)
   // physicsObjects = [] // initializing physics objects array
@@ -41,9 +41,11 @@ const DancingGrass =  () => {
   const canvasRef = useRef(null);
   const [adttar, setadttar] = useState([]);
   let aarr = useRef();
-  const size = 256;
+  const size = 100;
 
   useEffect( () => {
+        let di=new THREE.Vector3()
+    
 const stats = Stats()
 document.body.appendChild(stats.dom)
     ///PHYSICS
@@ -73,7 +75,7 @@ trest()
     let sky,sun;
 
     const camera = new THREE.PerspectiveCamera(
-      90,
+      95,
       window.innerWidth / window.innerHeight,
       0.1,
       5000
@@ -81,14 +83,13 @@ trest()
     const geom = new THREE.BufferGeometry();
 
     // Parameters
-    const PLANE_SIZE =20;
+    const PLANE_SIZE =40;
 
     // console.log(   (Math.round(Math.PI * PLANE_SIZE) * Math.PI) / 2.5 ,"pllll")
     let pano = new THREE.PlaneGeometry(
       PLANE_SIZE,
       PLANE_SIZE,
-      size - 1,
-      size - 1
+  150,150
     );
 
     //   function addInteractiveGeometry(scene,uniforms) {
@@ -189,7 +190,7 @@ cube1.position.y=0.3
     // addInteractiveGeometry(scene,unifopm)
 
     const BLADE_COUNT = pano.attributes.position.count;
-    const BLADE_WIDTH = 0.1;
+    const BLADE_WIDTH = 0.8;
     let BLADE_HEIGHT = 0.8;
     const BLADE_HEIGHT_VARIATION = 0.6;
      renderer = new THREE.WebGLRenderer({
@@ -205,7 +206,7 @@ function Tppcamera(camera, target) {
 
   function calculateoffset() {
     // Typical offset for a third-person camera: behind and above the target
-    let idealoffset = new THREE.Vector3(0, 12, 12); // back 10 units, up 5
+    let idealoffset = new THREE.Vector3(0, 3, -12); // back 10 units, up 5
     idealoffset.applyQuaternion(target.quaternion);
     idealoffset.add(target.position);
     return idealoffset;
@@ -213,7 +214,7 @@ function Tppcamera(camera, target) {
 
   function calculatelookat() {
     // Look slightly above the target's position
-    let ideallookat = new THREE.Vector3(0, 5, 4); // 3,4
+    let ideallookat = new THREE.Vector3(0, 5, -4); // 3,4
     ideallookat.applyQuaternion(target.quaternion);
     ideallookat.add(target.position);
     return ideallookat;
@@ -226,8 +227,8 @@ function Tppcamera(camera, target) {
     currentposition.copy(idealoffset);
     currentlookat.copy(ideallookat);
 
-    camera.position.copy(currentposition);
-    camera.lookAt(currentlookat); // 🔥 Don’t forget this!
+    camera.position.copy(currentposition).add(new THREE.Vector3(0,10,0));
+    camera.lookAt(currentlookat); 
   }
 
   return { updatec };
@@ -235,7 +236,7 @@ function Tppcamera(camera, target) {
 
 
 let {updatec} =Tppcamera(camera,cube1)
-console.log(updatec,"iiiiiiiii")
+// console.log(updatec,"iiiiiiiii")
 //
 
 
@@ -411,11 +412,19 @@ function initSky() {
     //     ];
 
     //     const blade = generateBlade(pos, i * VERTEX_COUNT, uv);
+      //  blade.visible = true;
+
     //     blade.verts.forEach((vert) => {
     //       positions.push(...vert.pos);
     //       uvs.push(...vert.uv);
     //       colors.push(...vert.color);
     //     });
+      // const localPos = new THREE.Vector3(xpl, ypl, zpl);
+        // blade.localPos = localPos;
+            // arrgrass.push(blade);
+// 
+            //
+            // blade.id = i;
     //     blade.indices.forEach((indice) => indices.push(indice));
     //   }
 
@@ -501,139 +510,144 @@ function initSky() {
         // const mesh = new THREE.Mesh(geometry, material);
         // scene.add(mesh);
 
-        for (let i = 0; i < BLADE_COUNT; i++) {
-          function callikg(params) {
-            const x = i % size;
-            const y = Math.floor(i / size);
-            // console.log(i,size,Math.floor(i/size),"iio",i%size)
+        for (let i = 0; i < BLADE_COUNT*3; i++) {
+        //   function callikg(params) {
+        //     const x = i % size;
+        //     const y = Math.floor(i / size);
+        //     // console.log(i,size,Math.floor(i/size),"iio",i%size)
 
-            const pixelIndex = (y * size + x) * 4;
-            const r = imgData[pixelIndex];
-            const heightValue = r / 255;
+        //     const pixelIndex = (y * size + x) * 4;
+        //     const r = imgData[pixelIndex];
+        //     const heightValue = r / 255;
 
-            // vertices.setY(i, heightValue * 10);
+        //     // vertices.setY(i, heightValue * 10);
 
-            return heightValue;
-          }
-          let heightValue = callikg();
+        //     return heightValue;
+        //   }
+        //   let heightValue = callikg();
 
-          if (heightValue > 0.6) {
-            // console.log("green",heightValue)
+     
+        //     // console.log("green",heightValue)
 
-            BLADE_HEIGHT = 0.6;
+        //     BLADE_HEIGHT = 0.9;
 
-            const xpl = vertices.getX(i);
+        //     const xpl = vertices.getX(i);
 
-            const ypl = vertices.getY(i);
-            const zpl = vertices.getZ(i);
-            const randomX = xpl + (Math.random() - 0.5) * 0.1;
-            const randomY = ypl + (Math.random() - 0.5) * 0.1;
-            const randomZ = zpl + (Math.random() - 0.5) * 0.1;
-            //
-            // const particle = new THREE.Points(new THREE.SphereGeometry(0.06), new THREE.PointsMaterial());
+        //     const ypl = vertices.getY(i);
+        //     const zpl = vertices.getZ(i);
+        //     const randomX = xpl + (Math.random() - 0.5) * 0.1;
+        //     const randomY = ypl + (Math.random() - 0.5) * 0.1;
+        //     const randomZ = zpl + (Math.random() - 0.5) * 0.1;
+        //     //
+        //     // const particle = new THREE.Points(new THREE.SphereGeometry(0.06), new THREE.PointsMaterial());
 
-            //             particle.position.set(randomX, randomY, randomZ);
+        //     //             particle.position.set(randomX, randomY, randomZ);
 
-            const VERTEX_COUNT = 5;
-            const surfaceMin = PLANE_SIZE / 2;
-            const surfaceMax = (PLANE_SIZE / 2) * -1;
-            const radius = pano.attributes.position.count;
-            const r = radius * Math.sqrt(Math.random());
-            const theta = Math.random() * 2 * Math.PI;
-            const x = r * Math.cos(theta);
-            const y = r * Math.sin(theta);
+        //     const VERTEX_COUNT = 5;
+        //     const surfaceMin = PLANE_SIZE / 2;
+        //     const surfaceMax = (PLANE_SIZE / 2) * -1;
+        //     const radius = pano.attributes.position.count;
+        //     const r = radius * Math.sqrt(Math.random());
+        //     const theta = Math.random() * 2 * Math.PI;
+        //     const x = r * Math.cos(theta);
+        //     const y = r * Math.sin(theta);
 
-            const pos = new THREE.Vector3(randomX, 0, randomY);
-            // console.log(pos)
-            const uv = [
-              convertRange(pos.x, surfaceMin, surfaceMax, 0, 1),
-              convertRange(pos.z, surfaceMin, surfaceMax, 0, 1),
-            ];
+        //     const pos = new THREE.Vector3(randomX, 0, randomY);
+        //     // console.log(pos)
+        //     const uv = [
+        //       convertRange(pos.x, surfaceMin, surfaceMax, 0, 1),
+        //       convertRange(pos.z, surfaceMin, surfaceMax, 0, 1),
+        //     ];
 
-            const blade = generateBlade(pos, i * VERTEX_COUNT, uv);
-            blade.visible = true;
-            blade.verts.forEach((vert) => {
-              positions.push(...vert.pos);
-              uvs.push(...vert.uv);
-              colors.push(...vert.color);
-            });
+        //     const blade = generateBlade(pos, i * VERTEX_COUNT, uv);
+        //     blade.visible = true;
+        //     blade.verts.forEach((vert) => {
+        //       positions.push(...vert.pos);
+        //       uvs.push(...vert.uv);
+        //       colors.push(...vert.color);
+        //     });
 
-            ///
-            const localPos = new THREE.Vector3(xpl, ypl, zpl);
-            blade.localPos = localPos;
-            //
-            blade.id = i;
+        //     ///
+        //     const localPos = new THREE.Vector3(xpl, ypl, zpl);
+        //     blade.localPos = localPos;
+        //     //
+        //     blade.id = i;
 
-        blade.indices.forEach((indice) => indices.push(indice));
-        blade.visible = false;
+        // blade.indices.forEach((indice) => indices.push(indice));
+        // blade.visible = false;
       
-            checkblade(blade);
-            // console.log("is vosisi", blade.id);
+        //     checkblade(blade);
+        //     // console.log("is vosisi", blade.id);
 
-            arrgrass.push(blade);
-            vertices.setY(i, heightValue * 100);
-          } else {
-            BLADE_HEIGHT = 0.5;
+        //     arrgrass.push(blade);
+        //     // vertices.setY(i, heightValue * 100);
+          
+        
 
-            const xpl = vertices.getX(i);
+        //   // vertices.setY(i, heightValue * 100);
+       
+      
+  const xpl = vertices.getX(i);
+        const ypl = vertices.getY(i);
+        const zpl = vertices.getZ(i);
+        const randomX = xpl + (Math.random() - 0.5) * 0.1;
+        const randomY = ypl + (Math.random() - 0.5) * 0.1;
+        const randomZ = zpl + (Math.random() - 0.5) * 0.1;
 
-            const ypl = vertices.getY(i);
-            const zpl = vertices.getZ(i);
-            const randomX = xpl + (Math.random() - 0.5) * 0.1;
-            const randomY = ypl + (Math.random() - 0.5) * 0.1;
-            const randomZ = zpl + (Math.random() - 0.5) * 0.1;
+        // const particle = new THREE.Points(new THREE.SphereGeometry(0.06), new THREE.PointsMaterial());
 
-            // const particle = new THREE.Points(new THREE.SphereGeometry(0.06), new THREE.PointsMaterial());
+        //             particle.position.set(randomX, randomY, randomZ);
 
-            //             particle.position.set(randomX, randomY, randomZ);
+        const VERTEX_COUNT = 5;
+        const surfaceMin = PLANE_SIZE / 2;
+        const surfaceMax = (PLANE_SIZE / 2) * -1;
+        const radius = pano.attributes.position.count;
+        const r = radius * Math.sqrt(Math.random());
+        const theta = Math.random() * 2 * Math.PI;
+        const x = r * Math.cos(theta);
+        const y = r * Math.sin(theta);
 
-            const VERTEX_COUNT = 5;
-            const surfaceMin = PLANE_SIZE / 2;
-            const surfaceMax = (PLANE_SIZE / 2) * -1;
-            const radius = pano.attributes.position.count;
-            const r = radius * Math.sqrt(Math.random());
-            const theta = Math.random() * 2 * Math.PI;
-            const x = r * Math.cos(theta);
-            const y = r * Math.sin(theta);
+        const pos = new THREE.Vector3(randomX, 0, randomY);
+        
+        // console.log("lengthhhhljgihwdgbkhfgbdg",pano.worldToLocal(pos.clone()))
+// const noGrassRadius = 2;
+// if (pos.length() < noGrassRadius) {
+//   continue; // Skip this blade
+// }
+let placewidth=1
+const exclusionSize = 10;
 
-            const pos = new THREE.Vector3(randomX, 0, randomY);
-            // console.log(pos)
-            const uv = [
-              convertRange(pos.x, surfaceMin, surfaceMax, 0, 1),
-              convertRange(pos.z, surfaceMin, surfaceMax, 0, 1),
-            ];
 
-            const blade = generateBlade(pos, i * VERTEX_COUNT, uv);
+        const uv = [
+          convertRange(pos.x, surfaceMin, surfaceMax, 0, 1),
+          convertRange(pos.z, surfaceMin, surfaceMax, 0, 1)
+        ];
 
-            // console.log(blade.pos)
-
+        const blade = generateBlade(pos, i * VERTEX_COUNT, uv);
             blade.visible = true;
-            blade.verts.forEach((vert) => {
-              positions.push(...vert.pos);
-              uvs.push(...vert.uv);
-              colors.push(...vert.color);
-            });
 
-            ///
-            blade.id = i;
-            // console.log(blade.id);
-            const localPos = new THREE.Vector3(xpl, ypl, zpl);
+        blade.verts.forEach((vert) => {
+          colors.push(...vert.color)
+          positions.push(...vert.pos);
+          uvs.push(...vert.uv);
+        
+        });
+               const localPos = new THREE.Vector3(xpl, ypl, zpl);
             blade.localPos = localPos;
             //
-
-            checkblade(blade);
-            // console.log("is vosisi",blade.visible)
-
+            
+            blade.id = i;
         blade.indices.forEach((indice) => indices.push(indice));
-        blade.visible = false;
-   
             arrgrass.push(blade);
 
-            // console.log("yellow",heightValue)
-          }
 
-          // vertices.setY(i, heightValue * 100);
-        }
+
+      }
+          
+      
+      
+      
+      
 
         geom.setAttribute(
           "position",
@@ -654,17 +668,20 @@ function initSky() {
         // geom.computeVertexNormals();
         // geom.computeFaceNormals();
 
-//         grassmesh = new THREE.Mesh(geom, grassMaterial);
+        grassmesh = new THREE.Mesh(geom, grassMaterial);
+    // planetyre.scale.multiplyScalar(9)
       
 // //         let scalesi=20
 // grassmesh.scale.multiplyScalar(9)
+grassmesh.scale.set(5,1,6)
+
 // // grassmesh.scale.x=3
 // // grassmesh.scale.z=3
 
 // // console.log(grassmesh.scale)
-//         grassmesh.name = "grass";
+        grassmesh.name = "grass";
 
-        // scene.add(grassmesh);
+        scene.add(grassmesh);
       });
 
       // glassgrid(positions,uvs,colors)
@@ -695,11 +712,11 @@ function initSky() {
     scene.add(cube)
   }
    const NUM_CUBES = 10
-  for (let i = 0; i < NUM_CUBES; i++) {
-    _addCubeMesh(
-      new THREE.Vector3((Math.random() - 0.5) * 20, 10 + i * 5, (Math.random() - 0.5) * 20)
-    )
-  }
+  // for (let i = 0; i < NUM_CUBES; i++) {
+  //   _addCubeMesh(
+  //     new THREE.Vector3((Math.random() - 0.5) * 20, 10 + i * 5, (Math.random() - 0.5) * 20)
+  //   )
+  // }
     function checkblade(blade) {
      
     }
@@ -768,7 +785,7 @@ function initSky() {
       scene.add(grp);
     }
 
-    function generateBlade(center, vArrOffset, uv) {
+     function generateBlade(center, vArrOffset, uv) {
       const MID_WIDTH = BLADE_WIDTH * 0.5;
       const TIP_OFFSET = 0.1;
       const height = BLADE_HEIGHT;
@@ -824,7 +841,7 @@ function initSky() {
         { pos: br, uv: uv, color: black },
         { pos: tr, uv: uv, color: gray },
         { pos: tl, uv: uv, color: gray },
-        { pos: tc, uv: uv, color: white },
+        { pos: tc, uv: uv, color: white }
       ];
 
       const indices = [
@@ -836,11 +853,12 @@ function initSky() {
         vArrOffset + 3,
         vArrOffset + 3,
         vArrOffset,
-        vArrOffset + 2,
+        vArrOffset + 2
       ];
 
       return { verts, indices };
     }
+
 
     function onMouseMove(event) {
       if (adtt.length >= pano.attributes.position.count - 3) {
@@ -935,10 +953,73 @@ function smallgra(){
   }
 
 ////small ghrsaas
+const keysPressed = {}; // Object to track pressed keys
+
+// Listen for keys down
+window.addEventListener("keydown", (event) => {
+  keysPressed[event.key.toLowerCase()] = true;
+});
+
+// Listen for keys up
+window.addEventListener("keyup", (event) => {
+  keysPressed[event.key.toLowerCase()] = false;
+});
 
     const animate = function () {
+
+
+
+
+
+
+  const rotateAmount = THREE.MathUtils.degToRad(2);
+  let  moveSpeed = 0.1;
+
+  // Get forward direction
+  cube1.getWorldDirection(di);
+console.log(keysPressed,"pp")
+  // FORWARD (W)
+  if (keysPressed["shift"]) {
+ console.log("shiftt")
+ moveSpeed=0.4
+    
+  }else{
+    moveSpeed=0.1
+  }
+  if (keysPressed["w"]) {
+    cube1.position.add(di.clone().multiplyScalar(moveSpeed));
+  }
+
+  // BACKWARD (S)
+  if (keysPressed["s"]) {
+    cube1.position.add(di.clone().multiplyScalar(-moveSpeed));
+  }
+
+  // TURN LEFT (A)
+  if (keysPressed["a"]) {
+    cube1.rotation.y += rotateAmount;
+  }
+
+  // TURN RIGHT (D)
+  if (keysPressed["d"]) {
+    cube1.rotation.y -= rotateAmount;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     stats.update()
-    Loopenine()
+    // Loopenine()
       const elapsedTime = Date.now() - startTime;
       // controls.update();
 // cube1.position.x=Math.sin(elapsedTime)
@@ -947,8 +1028,12 @@ function smallgra(){
         const amplitude= 7; // how far the cube moves left-right
    
   const speed = 0.4;    
-      cube1.position.x = Math.cos(t * speed) * Math.floor(amplitude);
-  cube1.position.z = Math.cos(t * speed) * Math.floor(amplitude); 
+  //     cube1.position.x = Math.cos(t * speed) * Math.floor(amplitude);
+  // cube1.position.z = Math.cos(t * speed) * Math.floor(amplitude); 
+
+
+
+
   
 //   //tryemark
 
@@ -970,7 +1055,7 @@ raycastertyre.set(origin2, direction2);
 const intersects2 = raycastertyre.intersectObject(planetyre);
 if (intersects2.length > 0) {
   const hit = intersects2[0];
-  // console.log("Hit222222222 the plane at:", hit.point);
+  console.log("Hit222222222 the plane at:", hit.point);
 
   // Convert world hit point to plane local space
   const localPoint = planetyre.worldToLocal(hit.point.clone());
@@ -1005,42 +1090,42 @@ if (intersects2.length > 0) {
       // raycaster.set(marker.position, new THREE.Vector3(0, -1, 0)); // Casting downward
 
       //
-//    if (arrgrass.length > 1000) {
-//   const carPos = new THREE.Vector3();
-//   cube1.getWorldPosition(carPos);
+   if (arrgrass.length > 1000) {
+  const carPos = new THREE.Vector3();
+  cube1.getWorldPosition(carPos);
 
-//   const exclusionRadius = 6; // Adjust to your needs
+  const exclusionRadius = 6; // Adjust to your needs
 
-// //   // Clear and re-assign indices based on visibility
-//   indices.length = 0;
+//   // Clear and re-assign indices based on visibility
+  indices.length = 0;
 
-//   arrgrass.forEach((blade) => {
-//     // Convert blade localPos to world position
-//     const worldBladePos = grassmesh.localToWorld(new THREE.Vector3(blade.localPos.clone().x,0,blade.localPos.clone().y));
+  arrgrass.forEach((blade) => {
+    // Convert blade localPos to world position
+    const worldBladePos = grassmesh.localToWorld(new THREE.Vector3(blade.localPos.clone().x,0,blade.localPos.clone().y));
 
-//     const distance = worldBladePos.distanceTo(carPos);
-// const dx = Math.abs(worldBladePos.x - carPos.x);
-// const dz = Math.abs(worldBladePos.z - carPos.z);
+    const distance = worldBladePos.distanceTo(carPos);
+const dx = Math.abs(worldBladePos.x - carPos.x);
+const dz = Math.abs(worldBladePos.z - carPos.z);
 
-// const squareSize = 1.5; // Half-size of the square area
-//     if (distance < exclusionRadius) {   //ciecleif
-//     // if (   dx < 2 && dz < squareSize/20) { 
-//       blade.visible = false;
-//     } else {
-// //  checkblade(blade)
+const squareSize = 1.5; // Half-size of the square area
+    if (distance < exclusionRadius) {   //ciecleif
+    // if (   dx < 2 && dz < squareSize/20) { 
+      blade.visible = false;
+    } else {
+//  checkblade(blade)
 
-//   blade.indices.forEach((indice) => indices.push(indice));
-//         blade.visible = false;
-//     }
-//   });
+  blade.indices.forEach((indice) => indices.push(indice));
+        blade.visible = false;
+    }
+  });
 
 
-// //   // Update the index buffer so the mesh redraws only visible blades
-//   grassmesh.geometry.setIndex(indices);
-//   grassmesh.geometry.attributes.position.needsUpdate = true;
-//   grassmesh.geometry.attributes.uv.needsUpdate = true;
-//   grassmesh.geometry.attributes.color.needsUpdate = true;
-// }
+//   // Update the index buffer so the mesh redraws only visible blades
+  grassmesh.geometry.setIndex(indices);
+  grassmesh.geometry.attributes.position.needsUpdate = true;
+  grassmesh.geometry.attributes.uv.needsUpdate = true;
+  grassmesh.geometry.attributes.color.needsUpdate = true;
+}
 
       // cube2.position.x+=Math.sin(elapsedTime*0.1)
       //  console.log(  cube1.position.distanceTo(cube1.position),"is the distnce")
@@ -1081,7 +1166,7 @@ if (intersects2.length > 0) {
 
 export default DancingGrass;
 
-console.log(RAPIER,"rrrrrrrrrrrrrrrrrrrrrrrrrrr")
+// console.log(RAPIER,"rrrrrrrrrrrrrrrrrrrrrrrrrrr")
 export { RAPIER }
 // export const useGltfLoader = () => gltfLoader
 // export const useTextureLoader = () => textureLoader
